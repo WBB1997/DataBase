@@ -1,8 +1,7 @@
 package Adapter;
 
 import Charactor.Student;
-import Util.DBUtil;
-import Util.StudentManager;
+import Util.InfoManager;
 import Util.XmlUtil;
 
 import javax.swing.*;
@@ -10,9 +9,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OracleAdapter extends DBUtil implements StudentManager {
+public class OracleAdapter implements InfoManager {
     private Connection connection = null;
-    private String TableName = XmlUtil.getTableName();
+    private static String TableName = XmlUtil.getTableName();
 
     @Override
     public String add(Student student) {
@@ -20,7 +19,7 @@ public class OracleAdapter extends DBUtil implements StudentManager {
         String state = "添加成功！";
         String sql = "INSERT INTO " + TableName + " VALUES(?,?,?,?,?,?,?)";
         try {
-            connection = getConnection();
+            connection = new DBConnection().getConnection();
             ps = connection.prepareStatement(sql);
             setAttribute(ps, student, 1);
             ps.executeUpdate();
@@ -38,10 +37,9 @@ public class OracleAdapter extends DBUtil implements StudentManager {
     public String delete(Student student) {
         PreparedStatement ps = null;
         String state = "删除成功！";
-        String sql = "DELETE FROM " + TableName +
-                "WHERE Sno = ? AND Cno = ?";
+        String sql = "DELETE FROM " + TableName + " WHERE Sno = ? AND Cno = ?";
         try {
-            connection = getConnection();
+            connection = new DBConnection().getConnection();
             ps = connection.prepareStatement(sql);
             ps.setString(1, student.getSno());
             ps.setString(2, student.getCno());
@@ -63,7 +61,7 @@ public class OracleAdapter extends DBUtil implements StudentManager {
         String sql = "UPDATE " + TableName + " SET SNO=?,SNAME=?,SSEX=?,SAGE=?,SDEPT=?,CNO=?,GRADE=? " +
                 "WHERE Sno = ? AND Cno = ?";
         try {
-            connection = getConnection();
+            connection = new DBConnection().getConnection();
             ps = connection.prepareStatement(sql);
             setAttribute(ps, newone, 1);
             ps.setString(8, oldone.getSno());
@@ -80,15 +78,16 @@ public class OracleAdapter extends DBUtil implements StudentManager {
     }
 
     @Override
-    public List<Student> get(String flag, String argument) {
+    public List<Student> get(String args, String keyword) {
         PreparedStatement ps = null;
         ResultSet rs = null;
-        List<Student> res = new ArrayList<>();
-        String sql = "SELECT * FROM " + TableName + " WHERE " + flag + "=?";
+        setRowCount("SELECT COUNT(*) FROM " + TableName + " WHERE " + args + "='" + keyword + "'");
+        String sql = getPageSql("SELECT * FROM " + TableName + " WHERE " + args + "=?", PageControl.getPage());
+        System.out.println(">"+new Exception().getStackTrace()[0].getLineNumber()  + ":"+ sql);
         try {
-            connection = getConnection();
+            connection = new DBConnection().getConnection();
             ps = connection.prepareStatement(sql);
-            ps.setString(1, argument);
+            ps.setString(1, keyword);
             rs = ps.executeQuery();
             return getResult(rs);
         } catch (SQLException s) {
@@ -101,13 +100,13 @@ public class OracleAdapter extends DBUtil implements StudentManager {
     }
 
     @Override
-    public List<String> getcolumnNames() {
-        Statement st;
-        ResultSet rs;
+    public List<String> getColumnNames() {
+        Statement st = null;
+        ResultSet rs = null;
         String sql = "SELECT * FROM " + TableName;
         List<String> columnNames = new ArrayList<>();
         try {
-            connection = getConnection();
+            connection = new DBConnection().getConnection();
             st = connection.createStatement();
             rs = st.executeQuery(sql);
             ResultSetMetaData rsmd = rs.getMetaData();
@@ -116,18 +115,21 @@ public class OracleAdapter extends DBUtil implements StudentManager {
         } catch (SQLException s) {
             s.printStackTrace();
             JOptionPane.showMessageDialog(null, s.getMessage(), "错误", JOptionPane.WARNING_MESSAGE);
+        } finally {
+            closeResource(connection, st, rs);
         }
         return columnNames;
     }
 
     @Override
-    public List<Student> getstudentList() {
+    public List<Student> getInfoList() {
         List<Student> students = new ArrayList<>();
-        String sql = "SELECT * FROM " + TableName;
+        setRowCount("SELECT COUNT(*) FROM " + TableName);
+        String sql = getPageSql("SELECT * FROM " + TableName, PageControl.getPage());
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            connection = getConnection();
+            connection = new DBConnection().getConnection();
             ps = connection.prepareStatement(sql);
             rs = ps.executeQuery();
             return getResult(rs);
@@ -138,6 +140,42 @@ public class OracleAdapter extends DBUtil implements StudentManager {
             closeResource(connection, ps, rs);
         }
         return students;
+    }
+
+    private String getPageSql(String sql, int Page) {
+        int pageSize = PageControl.getPageSize();
+        int start = Page * pageSize + 1;
+        int end = start + pageSize - 1;
+        List<String> columnNames = getColumnNames();
+        StringBuilder head = new StringBuilder();
+        for (String str : columnNames)
+            head.append(str).append(",");
+        head.deleteCharAt(head.length() - 1);
+        return "SELECT " + head + " FROM (SELECT tmp.*, ROWNUM rn FROM (" +
+                sql +
+                ") tmp WHERE ROWNUM <= " +
+                Integer.toString(end) +
+                ") WHERE rn >= " +
+                Integer.toString(start);
+    }
+
+    public void setRowCount(String sql) {
+        Statement st;
+        ResultSet rs;
+        int count = 0;
+        Connection connection;
+        try {
+            connection = new DBConnection().getConnection();
+            st = connection.createStatement();
+            rs = st.executeQuery(sql);
+            while (rs.next())
+                count = rs.getInt(1);
+        } catch (SQLException s) {
+            s.printStackTrace();
+            JOptionPane.showMessageDialog(null, s.getMessage(), "错误", JOptionPane.WARNING_MESSAGE);
+        }
+        PageControl.setRowCount(count);
+        System.out.println(new Exception().getStackTrace()[0].getMethodName() + PageControl.getRowCount());
     }
 
     private void setAttribute(PreparedStatement ps, Student stu, int index) throws SQLException {

@@ -1,7 +1,7 @@
 package Windows;
 
 import Charactor.Student;
-import Util.StudentManager;
+import Util.InfoManager;
 import Util.XmlUtil;
 
 import javax.swing.*;
@@ -24,12 +24,12 @@ class AddStudentPanel extends JDialog {
         cancel.setText("取消");
         submit.addActionListener(e -> {
             Student tmp = new Student();
-            StudentManager studentManager = (StudentManager) XmlUtil.getBean();
+            InfoManager infoManager = (InfoManager) XmlUtil.getBean();
             List<String> list = new ArrayList<>();
             for (JTextField aTextField : textField)
                 list.add(aTextField.getText());
             tmp.setList(list);
-            JOptionPane.showMessageDialog(null, studentManager.add(tmp), "信息", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, infoManager.add(tmp), "信息", JOptionPane.WARNING_MESSAGE);
         });
         cancel.addActionListener(e -> this.dispose());
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);

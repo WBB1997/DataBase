@@ -1,8 +1,9 @@
 package Windows;
 
 import Charactor.Student;
-import Util.StudentManager;
-import Util.StudentTableModel;
+import Util.InfoManager;
+import Util.InfoModel;
+import Adapter.PageControl;
 import Util.XmlUtil;
 
 import javax.swing.*;
@@ -16,14 +17,16 @@ public class MainFrame extends JFrame {
     private JFrame mainJFrame;
     private JButton search;
 
+    private boolean flag = false;
+
     public MainFrame() {
         mainJFrame = this;
         search = new JButton("查找");
         JButton flash = new JButton("刷新");
         JTextField input = new JTextField(60);
-        StudentTableModel stm = new StudentTableModel();
-        table = new JTable(stm);
-        JComboBox<String> menu = new JComboBox<>(stm.getColumnNames().toArray(new String[]{}));
+        InfoModel tm = new InfoModel(((InfoManager) XmlUtil.getBean()).getInfoList(), ((InfoManager) XmlUtil.getBean()).getColumnNames());
+        table = new JTable(tm);
+        JComboBox<String> menu = new JComboBox<>(tm.getColumnNames().toArray(new String[]{}));
         JPanel innerPanelNouth = new JPanel();
         innerPanelNouth.setLayout(new FlowLayout(FlowLayout.CENTER));
         innerPanelNouth.add(menu);
@@ -38,28 +41,32 @@ public class MainFrame extends JFrame {
         JButton next = new JButton("下一页");
         JButton add = new JButton("添加");
         first.addActionListener(e -> {
-            ((StudentTableModel) table.getModel()).firstPage();
-            table.updateUI();
+            PageControl.setFirstPage();
+            System.out.println("Page->" + PageControl.getPage() + "/AllPage->" + PageControl.getAllPage());
+            dosomething();
         });
         last.addActionListener(e -> {
-            ((StudentTableModel) table.getModel()).lastPage();
-            table.updateUI();
+            PageControl.setLastPage();
+            System.out.println("Page->" + PageControl.getPage() + "/AllPage->" + PageControl.getAllPage());
+            dosomething();
         });
         next.addActionListener(e -> {
-            ((StudentTableModel) table.getModel()).nextPage();
-            table.updateUI();
+            PageControl.setNextPage();
+            System.out.println("Page->" + PageControl.getPage() + "/AllPage->" + PageControl.getAllPage());
+            dosomething();
         });
         prev.addActionListener(e -> {
-            ((StudentTableModel) table.getModel()).prevPage();
-            table.updateUI();
+            PageControl.setPrevPage();
+            System.out.println("Page->" + PageControl.getPage() + "/AllPage->" + PageControl.getAllPage());
+            dosomething();
         });
         add.addActionListener(e -> {
-            AddStudentPanel panel =  new AddStudentPanel(((StudentTableModel) table.getModel()).getColumnNames(), mainJFrame);
+            AddStudentPanel panel = new AddStudentPanel(((InfoModel) table.getModel()).getColumnNames(), mainJFrame);
             panel.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
-                    ((StudentTableModel)table.getModel()).setPage(0);
-                    search.doClick();
+                    PageControl.setFirstPage();
+                    table.setModel(new InfoModel(((InfoManager) XmlUtil.getBean()).getInfoList(), ((InfoManager) XmlUtil.getBean()).getColumnNames()));
                     super.windowClosing(e);
                 }
             });
@@ -72,10 +79,6 @@ public class MainFrame extends JFrame {
         JScrollPane sp = new JScrollPane(table);
         ListSelectionModel selectionModel = table.getSelectionModel();
         selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        selectionModel.addListSelectionListener(e -> {
-            int row = table.getSelectedRow();
-            System.out.println("选择了" + row + "行");
-        });
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -106,36 +109,25 @@ public class MainFrame extends JFrame {
             }
         });
         search.addActionListener(e -> {
-            String flag = (String) menu.getSelectedItem();
-            StudentManager studentManager = (StudentManager) XmlUtil.getBean();
+            String args = (String) menu.getSelectedItem();
+            InfoManager infoManager = (InfoManager) XmlUtil.getBean();
             String keyword = input.getText();
             if (keyword.length() > 0) {
-                List<Student> res = studentManager.get(flag, input.getText());
-                StudentTableModel model = new StudentTableModel(res);
-                model.setPage(((StudentTableModel) table.getModel()).getPage());
-                table.setModel(model);
+                if(!flag)
+                    PageControl.setFirstPage();
+                table.setModel(new InfoModel(infoManager.get(args, input.getText()), ((InfoManager) XmlUtil.getBean()).getColumnNames()));
+                flag = true;
             } else {
-                StudentTableModel model = new StudentTableModel();
-                model.setPage(((StudentTableModel) table.getModel()).getPage());
-                table.setModel(model);
+                table.setModel(new InfoModel(((InfoManager) XmlUtil.getBean()).getInfoList(), ((InfoManager) XmlUtil.getBean()).getColumnNames()));
+                flag = false;
             }
         });
         flash.addActionListener(e -> {
-            table.setModel(new StudentTableModel());
+            PageControl.setFirstPage();
+            table.setModel(new InfoModel(((InfoManager) XmlUtil.getBean()).getInfoList(), ((InfoManager) XmlUtil.getBean()).getColumnNames()));
             input.setText("");
+            flag = false;
         });
-//        this.addWindowListener(new WindowAdapter() {
-//            @Override
-//            public void windowGainedFocus(WindowEvent e) {
-//                System.out.println("State");
-//                int rowHeight = table.getRowHeight();
-//                int Height = mainJFrame.getHeight();
-//                int pageSize = Height / rowHeight;
-//                StudentTableModel.setPageSize(pageSize);
-//                search.doClick();
-//                super.windowGainedFocus(e);
-//            }
-//        });
         this.add(sp, BorderLayout.CENTER);
         this.add(innerPanelNouth, BorderLayout.NORTH);
         this.add(innerPanelSouth, BorderLayout.SOUTH);
@@ -145,10 +137,10 @@ public class MainFrame extends JFrame {
 
         Student student = new Student();
         List<String> list = new ArrayList<>();
-        for(int i = 0; i < student.getAttrCounts(); i++)
-            list.add(table.getValueAt(row,i).toString());
+        for (int i = 0; i < student.getAttrCounts(); i++)
+            list.add(table.getValueAt(row, i).toString());
         student.setList(list);
-        StudentManager studentManager = (StudentManager) XmlUtil.getBean();
+        InfoManager infoManager = (InfoManager) XmlUtil.getBean();
 
         JPopupMenu jPopupMenu = new JPopupMenu();
         JMenuItem delMenuItem = new JMenuItem("删除");
@@ -158,15 +150,16 @@ public class MainFrame extends JFrame {
             int select;
             select = JOptionPane.showConfirmDialog(null, "确定删除吗?", "警告", JOptionPane.YES_NO_OPTION);
             if (select == 0) {
-                JOptionPane.showMessageDialog(null, studentManager.delete(student), "信息", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(null, infoManager.delete(student), "信息", JOptionPane.WARNING_MESSAGE);
                 search.doClick();
             }
         });
         updMenuItem.addActionListener(e -> {
-            UpdateStudentPanel panel =  new UpdateStudentPanel(((StudentTableModel) table.getModel()).getColumnNames(), student, mainJFrame);
+            UpdateStudentPanel panel = new UpdateStudentPanel(((InfoModel) table.getModel()).getColumnNames(), student, mainJFrame);
             panel.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
+//                    table.setModel(new InfoModel(((InfoManager) XmlUtil.getBean()).getInfoList(), ((InfoManager) XmlUtil.getBean()).getColumnNames()));
                     search.doClick();
                     super.windowClosing(e);
                 }
@@ -175,5 +168,13 @@ public class MainFrame extends JFrame {
         jPopupMenu.add(delMenuItem);
         jPopupMenu.add(updMenuItem);
         return jPopupMenu;
+    }
+
+    private void dosomething(){
+        if(!flag) {
+            InfoManager infoManager = (InfoManager) XmlUtil.getBean();
+            table.setModel(new InfoModel(infoManager.getInfoList(), infoManager.getColumnNames()));
+        }else
+            search.doClick();
     }
 }

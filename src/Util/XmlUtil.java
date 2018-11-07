@@ -9,15 +9,15 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class XmlUtil {
     private static Document document = null;
 
-    static String getDataBaseName() {
+    public static String getDataBaseName() {
         return getAttribute("DataBaseName");
     }
 
-    static String getUserName() {
+    public static String getUserName() {
         return getAttribute("UserName");
     }
 
-    static String getPassWord() {
+    public static String getPassWord() {
         return getAttribute("PassWord");
     }
 

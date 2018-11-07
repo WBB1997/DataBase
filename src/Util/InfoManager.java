@@ -4,7 +4,7 @@ import Charactor.Student;
 
 import java.util.List;
 
-public interface StudentManager {
+public interface InfoManager {
     //增加
     String add(Student student);
 
@@ -15,11 +15,12 @@ public interface StudentManager {
     String update(Student oldone, Student newone);
 
     //查询
-    List<Student> get(String flag, String argument);
+    List<Student> get(String args, String keyword);
 
     //获取数据
-    List<Student> getstudentList();
+    List<Student> getInfoList();
 
     //获取列名
-    List<String> getcolumnNames();
+    List<String> getColumnNames();
+
 }

@@ -1,4 +1,4 @@
-package Util;
+package Adapter;
 
 import Util.XmlUtil;
 import oracle.jdbc.driver.OracleDriver;
@@ -9,12 +9,12 @@ import java.util.Properties;
  * JDBC的六大步骤
  * JAVA连接Oracle的三种方式
  */
-public class DBUtil {
+class DBConnection {
     private static String DataBaseName = XmlUtil.getDataBaseName();
     private static String UserName = XmlUtil.getUserName();
     private static String PassWord = XmlUtil.getPassWord();
 
-    public Connection getConnection() throws SQLException {
+    Connection getConnection() throws SQLException {
         Driver driver = new OracleDriver();
         DriverManager.deregisterDriver(driver);
         Properties pro = new Properties();
