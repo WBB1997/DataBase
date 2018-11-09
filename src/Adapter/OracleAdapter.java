@@ -126,6 +126,7 @@ public class OracleAdapter implements InfoManager {
         List<Student> students = new ArrayList<>();
         setRowCount("SELECT COUNT(*) FROM " + TableName);
         String sql = getPageSql("SELECT * FROM " + TableName, PageControl.getPage());
+        System.out.println(sql);
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -175,7 +176,7 @@ public class OracleAdapter implements InfoManager {
             JOptionPane.showMessageDialog(null, s.getMessage(), "错误", JOptionPane.WARNING_MESSAGE);
         }
         PageControl.setRowCount(count);
-        System.out.println(new Exception().getStackTrace()[0].getMethodName() + PageControl.getRowCount());
+        System.out.println("RowCount：" + PageControl.getRowCount());
     }
 
     private void setAttribute(PreparedStatement ps, Student stu, int index) throws SQLException {

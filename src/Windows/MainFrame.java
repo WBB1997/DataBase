@@ -16,7 +16,7 @@ public class MainFrame extends JFrame {
     private JTable table;
     private JFrame mainJFrame;
     private JButton search;
-
+    private JTextField index;
     private boolean flag = false;
 
     public MainFrame() {
@@ -24,6 +24,7 @@ public class MainFrame extends JFrame {
         search = new JButton("查找");
         JButton flash = new JButton("刷新");
         JTextField input = new JTextField(60);
+        index = new JTextField(5);
         InfoModel tm = new InfoModel(((InfoManager) XmlUtil.getBean()).getInfoList(), ((InfoManager) XmlUtil.getBean()).getColumnNames());
         table = new JTable(tm);
         JComboBox<String> menu = new JComboBox<>(tm.getColumnNames().toArray(new String[]{}));
@@ -42,22 +43,18 @@ public class MainFrame extends JFrame {
         JButton add = new JButton("添加");
         first.addActionListener(e -> {
             PageControl.setFirstPage();
-            System.out.println("Page->" + PageControl.getPage() + "/AllPage->" + PageControl.getAllPage());
             dosomething();
         });
         last.addActionListener(e -> {
             PageControl.setLastPage();
-            System.out.println("Page->" + PageControl.getPage() + "/AllPage->" + PageControl.getAllPage());
             dosomething();
         });
         next.addActionListener(e -> {
             PageControl.setNextPage();
-            System.out.println("Page->" + PageControl.getPage() + "/AllPage->" + PageControl.getAllPage());
             dosomething();
         });
         prev.addActionListener(e -> {
             PageControl.setPrevPage();
-            System.out.println("Page->" + PageControl.getPage() + "/AllPage->" + PageControl.getAllPage());
             dosomething();
         });
         add.addActionListener(e -> {
@@ -73,6 +70,7 @@ public class MainFrame extends JFrame {
         });
         innerPanelSouth.add(first);
         innerPanelSouth.add(prev);
+        innerPanelSouth.add(index);
         innerPanelSouth.add(next);
         innerPanelSouth.add(last);
         innerPanelSouth.add(add);
@@ -121,6 +119,8 @@ public class MainFrame extends JFrame {
                 table.setModel(new InfoModel(((InfoManager) XmlUtil.getBean()).getInfoList(), ((InfoManager) XmlUtil.getBean()).getColumnNames()));
                 flag = false;
             }
+            index.setText(Integer.toString(PageControl.getPage()));
+            index.updateUI();
         });
         flash.addActionListener(e -> {
             PageControl.setFirstPage();
@@ -174,6 +174,8 @@ public class MainFrame extends JFrame {
         if(!flag) {
             InfoManager infoManager = (InfoManager) XmlUtil.getBean();
             table.setModel(new InfoModel(infoManager.getInfoList(), infoManager.getColumnNames()));
+            index.setText(Integer.toString(PageControl.getPage()));
+            index.updateUI();
         }else
             search.doClick();
     }
