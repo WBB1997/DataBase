@@ -18,7 +18,7 @@ public interface InfoManager {
     List<Student> get(String args, String keyword);
 
     //获取数据
-    List<Student> getInfoList();
+    List<Student> get();
 
     //获取列名
     List<String> getColumnNames();

@@ -11,6 +11,7 @@ public class Student {
     private String Sdept;
     private String Cno;
     private String Grade;
+
     private List<String> InfoList = new ArrayList<>();
 
     public String getCno() {

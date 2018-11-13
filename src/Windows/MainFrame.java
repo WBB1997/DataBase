@@ -24,8 +24,8 @@ public class MainFrame extends JFrame {
         search = new JButton("查找");
         JButton flash = new JButton("刷新");
         JTextField input = new JTextField(60);
-        index = new JTextField(5);
-        InfoModel tm = new InfoModel(((InfoManager) XmlUtil.getBean()).getInfoList(), ((InfoManager) XmlUtil.getBean()).getColumnNames());
+        index = new JTextField("1",5);
+        InfoModel tm = new InfoModel(((InfoManager) XmlUtil.getBean()).get(), ((InfoManager) XmlUtil.getBean()).getColumnNames());
         table = new JTable(tm);
         JComboBox<String> menu = new JComboBox<>(tm.getColumnNames().toArray(new String[]{}));
         JPanel innerPanelNouth = new JPanel();
@@ -63,7 +63,7 @@ public class MainFrame extends JFrame {
                 @Override
                 public void windowClosed(WindowEvent e) {
                     PageControl.setFirstPage();
-                    table.setModel(new InfoModel(((InfoManager) XmlUtil.getBean()).getInfoList(), ((InfoManager) XmlUtil.getBean()).getColumnNames()));
+                    table.setModel(new InfoModel(((InfoManager) XmlUtil.getBean()).get(), ((InfoManager) XmlUtil.getBean()).getColumnNames()));
                     super.windowClosing(e);
                 }
             });
@@ -116,15 +116,15 @@ public class MainFrame extends JFrame {
                 table.setModel(new InfoModel(infoManager.get(args, input.getText()), ((InfoManager) XmlUtil.getBean()).getColumnNames()));
                 flag = true;
             } else {
-                table.setModel(new InfoModel(((InfoManager) XmlUtil.getBean()).getInfoList(), ((InfoManager) XmlUtil.getBean()).getColumnNames()));
+                table.setModel(new InfoModel(((InfoManager) XmlUtil.getBean()).get(), ((InfoManager) XmlUtil.getBean()).getColumnNames()));
                 flag = false;
             }
-            index.setText(Integer.toString(PageControl.getPage()));
+            index.setText(Integer.toString(PageControl.getPage() + 1));
             index.updateUI();
         });
         flash.addActionListener(e -> {
             PageControl.setFirstPage();
-            table.setModel(new InfoModel(((InfoManager) XmlUtil.getBean()).getInfoList(), ((InfoManager) XmlUtil.getBean()).getColumnNames()));
+            table.setModel(new InfoModel(((InfoManager) XmlUtil.getBean()).get(), ((InfoManager) XmlUtil.getBean()).getColumnNames()));
             input.setText("");
             flag = false;
         });
@@ -159,7 +159,7 @@ public class MainFrame extends JFrame {
             panel.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
-//                    table.setModel(new InfoModel(((InfoManager) XmlUtil.getBean()).getInfoList(), ((InfoManager) XmlUtil.getBean()).getColumnNames()));
+//                    table.setModel(new InfoModel(((InfoManager) XmlUtil.getBean()).get(), ((InfoManager) XmlUtil.getBean()).getColumnNames()));
                     search.doClick();
                     super.windowClosing(e);
                 }
@@ -173,8 +173,8 @@ public class MainFrame extends JFrame {
     private void dosomething(){
         if(!flag) {
             InfoManager infoManager = (InfoManager) XmlUtil.getBean();
-            table.setModel(new InfoModel(infoManager.getInfoList(), infoManager.getColumnNames()));
-            index.setText(Integer.toString(PageControl.getPage()));
+            table.setModel(new InfoModel(infoManager.get(), infoManager.getColumnNames()));
+            index.setText(Integer.toString(PageControl.getPage() + 1));
             index.updateUI();
         }else
             search.doClick();

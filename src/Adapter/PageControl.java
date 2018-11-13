@@ -1,5 +1,9 @@
 package Adapter;
 
+import Charactor.Student;
+
+import java.util.ArrayList;
+
 public class PageControl {
     private static int page = 0;
     private static int rowCount = 0;

@@ -15,8 +15,8 @@ public class OracleAdapter implements InfoManager {
 
     @Override
     public String add(Student student) {
+        String state = "添加成功！"; // 执行状态
         PreparedStatement ps = null;
-        String state = "添加成功！";
         String sql = "INSERT INTO " + TableName + " VALUES(?,?,?,?,?,?,?)";
         try {
             connection = new DBConnection().getConnection();
@@ -79,24 +79,16 @@ public class OracleAdapter implements InfoManager {
 
     @Override
     public List<Student> get(String args, String keyword) {
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         setRowCount("SELECT COUNT(*) FROM " + TableName + " WHERE " + args + "='" + keyword + "'");
-        String sql = getPageSql("SELECT * FROM " + TableName + " WHERE " + args + "=?", PageControl.getPage());
-        System.out.println(">"+new Exception().getStackTrace()[0].getLineNumber()  + ":"+ sql);
-        try {
-            connection = new DBConnection().getConnection();
-            ps = connection.prepareStatement(sql);
-            ps.setString(1, keyword);
-            rs = ps.executeQuery();
-            return getResult(rs);
-        } catch (SQLException s) {
-            s.printStackTrace();
-            JOptionPane.showMessageDialog(null, s.getMessage(), "错误", JOptionPane.WARNING_MESSAGE);
-        } finally {
-            closeResource(connection, ps, rs);
-        }
-        return null;
+        String sql = getPageSql("SELECT * FROM " + TableName + " WHERE " + args + "='" + keyword + "'", PageControl.getPage());
+        return getList(sql);
+    }
+
+    @Override
+    public List<Student> get() {
+        setRowCount("SELECT COUNT(*) FROM " + TableName);
+        String sql = getPageSql("SELECT * FROM " + TableName, PageControl.getPage());
+        return getList(sql);
     }
 
     @Override
@@ -121,28 +113,6 @@ public class OracleAdapter implements InfoManager {
         return columnNames;
     }
 
-    @Override
-    public List<Student> getInfoList() {
-        List<Student> students = new ArrayList<>();
-        setRowCount("SELECT COUNT(*) FROM " + TableName);
-        String sql = getPageSql("SELECT * FROM " + TableName, PageControl.getPage());
-        System.out.println(sql);
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            connection = new DBConnection().getConnection();
-            ps = connection.prepareStatement(sql);
-            rs = ps.executeQuery();
-            return getResult(rs);
-        } catch (SQLException s) {
-            s.printStackTrace();
-            JOptionPane.showMessageDialog(null, s.getMessage(), "错误", JOptionPane.WARNING_MESSAGE);
-        } finally {
-            closeResource(connection, ps, rs);
-        }
-        return students;
-    }
-
     private String getPageSql(String sql, int Page) {
         int pageSize = PageControl.getPageSize();
         int start = Page * pageSize + 1;
@@ -160,7 +130,7 @@ public class OracleAdapter implements InfoManager {
                 Integer.toString(start);
     }
 
-    public void setRowCount(String sql) {
+    private void setRowCount(String sql) {
         Statement st;
         ResultSet rs;
         int count = 0;
@@ -235,5 +205,22 @@ public class OracleAdapter implements InfoManager {
             res.add(student);
         }
         return res;
+    }
+
+    private List<Student> getList(String sql) {
+        Statement st = null;
+        ResultSet rs = null;
+        try {
+            connection = new DBConnection().getConnection();
+            st = connection.createStatement();
+            rs = st.executeQuery(sql);
+            return getResult(rs);
+        } catch (SQLException s) {
+            s.printStackTrace();
+            JOptionPane.showMessageDialog(null, s.getMessage(), "错误", JOptionPane.WARNING_MESSAGE);
+        } finally {
+            closeResource(connection, st, rs);
+        }
+        return null;
     }
 }
