@@ -126,9 +126,9 @@ public class OracleAdapter implements InfoManager {
                 sql +
 //                " ORDER BY SNO) tmp WHERE ROWNUM <= " +
                 ") tmp WHERE ROWNUM <= " +
-                Integer.toString(end) +
+                end +
                 ") WHERE rn >= " +
-                Integer.toString(start);
+                start;
     }
 
     private void setRowCount(String sql) {
