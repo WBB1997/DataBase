@@ -8,7 +8,7 @@ import java.util.List;
 public class InfoModel extends AbstractTableModel {
 
     private List<String> columnNames;
-    private List<Student> studentList;
+    private List<Student> studentList; //更改表，此处需要更改
 
     public InfoModel(List<Student> studentList, List<String> columnNames) {
         this.studentList = studentList;

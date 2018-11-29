@@ -5,12 +5,12 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-class StudentUI  extends JPanel {
-    private JTextField fields[];
+class AbstructPanel extends JPanel {
+    private JTextField[] fields;
     private JButton doTask1, doTask2;
     private int size;
 
-    StudentUI(List<String> arrayString) {
+    AbstructPanel(List<String> arrayString) {
         size = arrayString.size();
         JLabel[] labels = new JLabel[size];
         fields = new JTextField[size];

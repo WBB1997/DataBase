@@ -14,13 +14,11 @@ import java.util.List;
 
 public class MainFrame extends JFrame {
     private JTable table;
-    private JFrame mainJFrame;
     private JButton search;
     private JTextField index;
     private boolean flag = false;
 
     public MainFrame() {
-        mainJFrame = this;
         search = new JButton("查找");
         JButton flash = new JButton("刷新");
         JTextField input = new JTextField(60);
@@ -58,7 +56,7 @@ public class MainFrame extends JFrame {
             dosomething();
         });
         add.addActionListener(e -> {
-            AddStudentPanel panel = new AddStudentPanel(((InfoModel) table.getModel()).getColumnNames(), mainJFrame);
+            AddInfoPanel panel = new AddInfoPanel(((InfoModel) table.getModel()).getColumnNames(), MainFrame.this);
             panel.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
@@ -155,7 +153,7 @@ public class MainFrame extends JFrame {
             }
         });
         updMenuItem.addActionListener(e -> {
-            UpdateStudentPanel panel = new UpdateStudentPanel(((InfoModel) table.getModel()).getColumnNames(), student, mainJFrame);
+            UpdateInfoPanel panel = new UpdateInfoPanel(((InfoModel) table.getModel()).getColumnNames(), student, MainFrame.this);
             panel.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {

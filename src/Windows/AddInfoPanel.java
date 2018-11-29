@@ -9,12 +9,12 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-class AddStudentPanel extends JDialog {
+class AddInfoPanel extends JDialog {
 
-    AddStudentPanel(List<String> columnNames, Frame parent) {
+    AddInfoPanel(List<String> columnNames, Frame parent) {
         super(parent, true);
-        StudentUI userInterface = new StudentUI(columnNames);
-        JTextField textField[] = userInterface.getFields();
+        AbstructPanel userInterface = new AbstructPanel(columnNames);
+        JTextField[] textField = userInterface.getFields();
 
         this.setLayout(new BorderLayout());
         this.add(userInterface, BorderLayout.CENTER);
@@ -23,12 +23,13 @@ class AddStudentPanel extends JDialog {
         submit.setText("提交");
         cancel.setText("取消");
         submit.addActionListener(e -> {
-            Student tmp = new Student();
+            Student tmp = new Student();// 更改表，此处需要更改
             InfoManager infoManager = (InfoManager) XmlUtil.getBean();
             List<String> list = new ArrayList<>();
             for (JTextField aTextField : textField)
                 list.add(aTextField.getText());
             tmp.setList(list);
+            //更改表，此处需要更改
             JOptionPane.showMessageDialog(null, infoManager.add(tmp), "信息", JOptionPane.WARNING_MESSAGE);
         });
         cancel.addActionListener(e -> this.dispose());
